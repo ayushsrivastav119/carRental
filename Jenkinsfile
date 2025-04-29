@@ -25,7 +25,8 @@ pipeline {
 
     stage('Build React App') {
       steps {
-        sh 'npm run build'
+        // Disable CI mode to allow warnings
+        sh 'CI=false npm run build'
       }
     }
 

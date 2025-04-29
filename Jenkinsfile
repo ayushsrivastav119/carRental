@@ -10,12 +10,11 @@ pipeline {
     CONTAINER_NAME = 'car-rental-container'
   }
 
-  stages {
-    stage('Clone Repo') {
-      steps {
-        git 'https://github.com/ayushsrivastav119/carRental.git'
-      }
-    }
+  stage('Clone Repo') {
+  steps {
+    git branch: 'main', url: 'https://github.com/ayushsrivastav119/carRental.git'
+  }
+}
 
     stage('Install Dependencies') {
       steps {

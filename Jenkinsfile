@@ -1,60 +1,61 @@
-  pipeline {
+pipeline {
     agent any
 
     tools {
-      nodejs 'node-18'  // Must match what you configured in Jenkins
+        nodejs 'node-18'  // Ensure 'node-18' is configured in Jenkins tools
     }
 
     environment {
-      IMAGE_NAME = 'car-rental-app'
-      CONTAINER_NAME = 'car-rental-container'
+        IMAGE_NAME = 'car-rental-app'
+        CONTAINER_NAME = 'car-rental-container'
     }
 
     stages {
-      stage('Clone Repo') {
-        steps {
-          git branch: 'main', url: 'https://github.com/ayushsrivastav119/carRental.git'
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ayushsrivastav119/carRental.git'
+            }
         }
-      }
 
-      stage('Install Dependencies') {
-        steps {
-          sh 'npm install'
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
         }
-      }
 
-      stage('Build React App') {
-        steps {
-          // Disable CI mode to allow warnings
-          sh 'CI=false npm run build'
+        stage('Build React App') {
+            steps {
+                sh 'CI=false npm run build'
+            }
         }
-      }
 
-      stage('Build Docker Image') {
-        steps {
-          sh 'docker build -t $IMAGE_NAME .'
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${IMAGE_NAME}")
+                }
+            }
         }
-      }
 
-      stage('Stop Old Container') {
-        steps {
-          sh 'docker rm -f $CONTAINER_NAME || true'
+        stage('Stop and Remove Old Container') {
+            steps {
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+            }
         }
-      }
 
-      stage('Run New Container') {
-        steps {
-          sh 'docker run -d --name $CONTAINER_NAME -p 3000:80 $IMAGE_NAME'
+        stage('Run New Docker Container') {
+            steps {
+                sh "docker run -d --name ${CONTAINER_NAME} -p 3000:80 ${IMAGE_NAME}"
+            }
         }
-      }
     }
 
     post {
-      success {
-        echo "✅ Deployment complete!"
-      }
-      failure {
-        echo "❌ Build failed!"
-      }
+        success {
+            echo "✅ Deployment complete!"
+        }
+        failure {
+            echo "❌ Build failed!"
+        }
     }
-  }
+}
